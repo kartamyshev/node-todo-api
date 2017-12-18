@@ -4,9 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "node playground/mongodb-connect.js"
+    "start": "node server/server.js"
   },
   "dependencies": {
-    "mongodb": "2.2.5"
+    "mongodb": "2.2.5",
+    "mongoose": "^4.13.7"
   }
 }
