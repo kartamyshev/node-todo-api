@@ -1,27 +1,59 @@
-const mongoose = require('mongoose');
+const express = require('express');
+const bodyParser = require('body-parser');
+const path = require('path');
+const pug = require('pug');
 
-mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/TodoApp');
+const { mongoose } = require('./db/mongoose');
+const { Todo, User } = require('./models');
 
-var Todo = mongoose.model('Todo', {
-  text: {
-    type: String
-  },
-  completed: {
-    type: Boolean,
-  },
-  completedAt: {
-    type: Number
-  }
+const app = express();
+app.use(bodyParser.json());
+
+app.set("view engine", "pug");
+app.set("views", path.join(__dirname, "../views"));
+
+app.post('/todos', (request, response, next) => {
+  const { text } = request.body;
+  const todo = new Todo({ text });
+
+  todo.save().then(doc => {
+    response.send(doc);
+  }, err => {
+    response.status(400).send(err);
+  })
 });
 
-var todo = new Todo({
-  text: 'Write an article',
-  completed: false,
-  completedAt: Date.now()
+app.post('/users', (request, response, next) => {
+  const { email } = request.body;
+  const user = new User({ email });
+
+  user.save().then(doc => {
+    response.send(doc);
+  }, err => {
+    response.send(err);
+  });
 });
 
-const success = doc => console.log('Saved doc:', JSON.stringify(doc, undefined, 2));
-const failure = err => console.log('Unable to save a doc', err);
+app.get('/', (request, response, next) => {
+  const { headers } = request;
+  response.render('home', {
+    name: 'Konstantin',
+    title: 'Home Page',
+    headers: Object.keys(headers).map(header => {
+      return {
+        key: header,
+        value: headers[header]
+      }
+    })
+  });
+});
 
-todo.save().then(success, failure);
+app.get('/todos', (request, response, next) => {
+  response.render('todos', {
+    title: 'Todos Page'
+  });
+});
+
+app.listen(3000, () => {
+  console.log('Server is listening on port 3000');
+});
