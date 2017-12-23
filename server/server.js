@@ -65,16 +65,16 @@ app.post('/todo/add', (request, response, next) => {
 });
 
 
-// app.post('/users', (request, response, next) => {
-//   const { email } = request.body;
-//   const user = new User({ email });
+app.post('/user/add', (request, response, next) => {
+  const { email } = request.body;
+  const user = new User({ email });
 
-//   user.save().then(doc => {
-//     response.send(doc);
-//   }, err => {
-//     response.send(err);
-//   });
-// });
+  user.save().then(doc => {
+    response.send(doc);
+  }, err => {
+    response.send(err);
+  });
+});
 
 
 
