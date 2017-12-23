@@ -24,6 +24,12 @@ app.get('/todos', (request, response) => {
   });
 });
 
+app.get('/users', (request, response) => {
+  User.find().then(users => {
+    response.send({ users });
+  });
+});
+
 app.get('/todos/:id', (request, response) => {
   const { id } = request.params;
   if (ObjectID.isValid(id) === false) {
