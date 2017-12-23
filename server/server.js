@@ -11,6 +11,10 @@ app.use(bodyParser.json());
 
 app.set("view engine", "pug");
 
+app.get('/json', (request, response) => {
+  response.send(request.headers);
+});
+
 app.get('/', (request, response, next) => {
   const { headers } = request;
   response.render('home', {
@@ -35,15 +39,17 @@ app.get('/todos/json', (request, response) => {
 });
 
 app.get('/todos', (request, response, next) => {
+  const result = {
+    title: 'Todos Page'
+  };
   Todo.find().then(todos => {
-    response.render('todos', {
-      title: 'Todos Page',
-      todos: todos
-    });
-  }, (error) => {
-    response.render('home', {
-      error: error
-    });
+    result.todos = todos;
+    return result;
+  }, error => {
+    result.error = error;
+    return result;
+  }).then(data => {
+    response.render('todos', data);
   });
 });
 
