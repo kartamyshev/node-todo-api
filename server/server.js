@@ -20,7 +20,7 @@ app.get('/', (request, response) => {
 
 app.get('/todos', (request, response) => {
   Todo.find().then(todos => {
-    response.send(todos);
+    response.send({ todos });
   });
 });
 
