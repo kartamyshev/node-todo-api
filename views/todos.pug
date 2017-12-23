@@ -4,7 +4,10 @@ html(lang="en")
   body
     include partials/header
     include partials/navigation
-    ul.headers
-      each todo in todos
-        li.todo
-          strong= todo.text
+    unless todos.length
+      p No todos
+    else
+      ul.headers
+        each todo in todos
+          li.todo
+            strong= todo.text

@@ -53,7 +53,7 @@ app.get('/todos', (request, response, next) => {
   });
 });
 
-app.post('/todos', (request, response, next) => {
+app.post('/todo/add', (request, response, next) => {
   const { text } = request.body;
   const todo = new Todo({ text });
 
