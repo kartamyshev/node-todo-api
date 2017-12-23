@@ -24,12 +24,6 @@ app.get('/todos', (request, response) => {
   });
 });
 
-app.get('/users', (request, response) => {
-  User.find().then(users => {
-    response.send({ users });
-  });
-});
-
 app.get('/todos/:id', (request, response) => {
   const { id } = request.params;
   if (ObjectID.isValid(id) === false) {
@@ -40,6 +34,27 @@ app.get('/todos/:id', (request, response) => {
   Todo.findById(id).then(todo => {
     if (!todo) response.status(404).send();
     response.send({ todo });
+  }).catch(err => {
+    response.status(400).send();
+  });
+});
+
+app.get('/users', (request, response) => {
+  User.find().then(users => {
+    response.send({ users });
+  });
+});
+
+app.get('/users/:id', (request, response) => {
+  const { id } = request.params;
+  if (ObjectID.isValid(id) === false) {
+    response.status(404).send();
+    return;
+  }
+
+  User.findById(id).then(user => {
+    if (!user) response.status(404).send();
+    response.send({ user });
   }).catch(err => {
     response.status(400).send();
   });
