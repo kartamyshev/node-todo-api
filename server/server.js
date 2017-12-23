@@ -10,7 +10,6 @@ const app = express();
 app.use(bodyParser.json());
 
 app.set("view engine", "pug");
-app.set("views", path.join(__dirname, "../views"));
 
 app.post('/todos', (request, response, next) => {
   const { text } = request.body;
@@ -57,3 +56,5 @@ app.get('/todos', (request, response, next) => {
 app.listen(3000, () => {
   console.log('Server is listening on port 3000');
 });
+
+module.exports = { app };

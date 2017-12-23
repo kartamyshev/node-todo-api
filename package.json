@@ -4,7 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon server/server.js"
+    "start": "nodemon server/server.js",
+    "test": "mocha server/**/*.test.js",
+    "test-watch": "nodemon --exec 'yarn test'"
   },
   "dependencies": {
     "body-parser": "^1.18.2",
@@ -15,6 +17,9 @@
     "pug": "^2.0.0-rc.4"
   },
   "devDependencies": {
-    "nodemon": "^1.14.1"
+    "expect": "^22.0.3",
+    "mocha": "^4.0.1",
+    "nodemon": "^1.14.1",
+    "supertest": "^3.0.0"
   }
 }
