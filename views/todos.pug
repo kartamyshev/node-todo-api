@@ -4,7 +4,7 @@ html(lang="en")
   body
     include partials/header
     include partials/navigation
-    p Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque dolores porro facilis perferendis amet consequuntur, voluptates, autem sapiente natus aperiam odit impedit nulla aspernatur possimus at itaque quibusdam exercitationem? Earum.
-    p Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque dolores porro facilis perferendis amet consequuntur, voluptates, autem sapiente natus aperiam odit impedit nulla aspernatur possimus at itaque quibusdam exercitationem? Earum.
-    p Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque dolores porro facilis perferendis amet consequuntur, voluptates, autem sapiente natus aperiam odit impedit nulla aspernatur possimus at itaque quibusdam exercitationem? Earum.
-    p Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque dolores porro facilis perferendis amet consequuntur, voluptates, autem sapiente natus aperiam odit impedit nulla aspernatur possimus at itaque quibusdam exercitationem? Earum.
+    ul.headers
+      each todo in todos
+        li.todo
+          strong= todo.text
