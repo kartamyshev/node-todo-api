@@ -61,8 +61,8 @@ app.get('/users/:id', (request, response) => {
 });
 
 app.post('/todo/add', (request, response, next) => {
-  const { text } = request.body;
-  const todo = new Todo({ text });
+  const { text, completed } = request.body;
+  const todo = new Todo({ text, completed });
 
   todo.save().then(doc => {
     response.send(doc);
@@ -81,8 +81,6 @@ app.post('/user/add', (request, response, next) => {
     response.send(err);
   });
 });
-
-
 
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
