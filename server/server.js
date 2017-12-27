@@ -39,6 +39,35 @@ app.get('/todos/:id', (request, response) => {
   });
 });
 
+app.post('/todo/add', (request, response, next) => {
+  const { text, completed } = request.body;
+  const todo = new Todo({ text, completed });
+
+  todo.save().then(doc => {
+    response.send(doc);
+  }, err => {
+    response.status(400).send(err);
+  })
+});
+
+app.delete('/todos/:id', (request, response) => {
+  const { id } = request.params;
+
+  if (ObjectID.isValid(id) === false) {
+    response.status(404).send('Inexistent Object ID.');
+    return;
+  }
+
+  Todo.findById(id).then(todo => {
+    if (!todo) {
+      response.status(404).send('No id found in database');
+    }
+    Todo.findByIdAndRemove(id).then(todo => {
+      response.status(200).send(todo);
+    });
+  });
+});
+
 app.get('/users', (request, response) => {
   User.find().then(users => {
     response.send({ users });
@@ -58,17 +87,6 @@ app.get('/users/:id', (request, response) => {
   }).catch(err => {
     response.status(400).send();
   });
-});
-
-app.post('/todo/add', (request, response, next) => {
-  const { text, completed } = request.body;
-  const todo = new Todo({ text, completed });
-
-  todo.save().then(doc => {
-    response.send(doc);
-  }, err => {
-    response.status(400).send(err);
-  })
 });
 
 app.post('/user/add', (request, response, next) => {
