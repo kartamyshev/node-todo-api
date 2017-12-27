@@ -58,14 +58,15 @@ app.delete('/todos/:id', (request, response) => {
     return;
   }
 
-  Todo.findById(id).then(todo => {
-    if (!todo) {
-      response.status(404).send('No id found in database');
-    }
-    Todo.findByIdAndRemove(id).then(todo => {
-      response.status(200).send(todo);
-    });
+  Todo.findByIdAndRemove(id).then(todo => {
+    const found = todo !== null;
+    response
+      .status(found ? 200 : 404)
+      .send(found ? todo : 'No id found in database');
+  }).catch(error => {
+    response.status(400).send();
   });
+
 });
 
 app.get('/users', (request, response) => {
