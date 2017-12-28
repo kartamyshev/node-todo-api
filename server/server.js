@@ -27,13 +27,15 @@ app.get('/todos', (request, response) => {
 app.get('/todos/:id', (request, response) => {
   const { id } = request.params;
   if (ObjectID.isValid(id) === false) {
-    response.status(404).send();
+    response.status(404).send('Inexistent Object ID.');
     return;
   }
 
   Todo.findById(id).then(todo => {
-    if (!todo) response.status(404).send();
-    response.send({ todo });
+    if (!todo) {
+      response.status(404).send('No id found in database');
+    }
+    response.status(200).send({ todo });
   }).catch(err => {
     response.status(400).send();
   });
@@ -59,10 +61,10 @@ app.delete('/todos/:id', (request, response) => {
   }
 
   Todo.findByIdAndRemove(id).then(todo => {
-    const found = todo !== null;
-    response
-      .status(found ? 200 : 404)
-      .send(found ? todo : 'No id found in database');
+    if (!todo) {
+      response.status(404).send('No id found in database');
+    }
+    response.status(200).send({ todo });
   }).catch(error => {
     response.status(400).send();
   });
