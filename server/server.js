@@ -1,16 +1,17 @@
+const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
+const { ObjectID } = require('mongodb');
 const path = require('path');
 const pug = require('pug');
-const { ObjectID } = require('mongodb');
-const port = process.env.PORT || 3000;
 
 const { mongoose } = require('./db/mongoose');
 const { Todo, User } = require('./models');
 
+const port = process.env.PORT || 3000;
 const app = express();
-app.use(bodyParser.json());
 
+app.use(bodyParser.json());
 app.set("view engine", "pug");
 
 app.get('/', (request, response) => {
@@ -71,6 +72,35 @@ app.delete('/todos/:id', (request, response) => {
 
 });
 
+app.patch('/todos/:id', (request, response) => {
+  const { id } = request.params;
+  const { text, completed } = _.pick(request.body, ['text', 'completed']);
+
+  if (!ObjectID.isValid(id)) {
+    return response.status(404).send('Inexistent Object ID.');
+  }
+
+  const updatedDoc = {
+    text,
+    completed,
+    completedAt: completed ? Date.now() : null
+  };
+
+  Todo.findByIdAndUpdate(id,
+    { $set: updatedDoc },
+    { new: true }
+  ).then(todo => {
+    if (!todo) {
+      return response.status(404).send();
+    }
+    response.status(200).send({ todo });
+  }, (err) => {
+    response.status(400).send();
+  });
+
+});
+
+
 app.get('/users', (request, response) => {
   User.find().then(users => {
     response.send({ users });
@@ -80,8 +110,7 @@ app.get('/users', (request, response) => {
 app.get('/users/:id', (request, response) => {
   const { id } = request.params;
   if (ObjectID.isValid(id) === false) {
-    response.status(404).send();
-    return;
+    return response.status(404).send();
   }
 
   User.findById(id).then(user => {
