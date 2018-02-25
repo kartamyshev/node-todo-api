@@ -1,27 +1,26 @@
 const _ = require('lodash');
 const express = require('express');
-const bodyParser = require('body-parser');
 const { ObjectID } = require('mongodb');
 const path = require('path');
 const pug = require('pug');
 
 const { mongoose } = require('./db/mongoose');
 const { Todo, User } = require('./models');
+const initMiddleware = require('./initMiddleware');
 
 const port = process.env.PORT || 3000;
 const app = express();
 
-app.use(bodyParser.json());
 app.set("view engine", "pug");
+initMiddleware(app);
 
 app.get('/', (request, response) => {
-  const { headers } = request;
-  response.send(headers);
+  response.send(request.headers);
 });
 
 app.get('/todos', (request, response) => {
   Todo.find().then(todos => {
-    response.send({ todos });
+    response.send(todos);
   });
 });
 
@@ -72,11 +71,28 @@ app.delete('/todos/:id', (request, response) => {
 
 });
 
+app.delete('/users/:id', (request, response) => {
+  const { id } = request.params;
+
+  if (ObjectID.isValid(id) === false) {
+    response.status(404).send('Inexistent Object ID.');
+  }
+
+  User.findByIdAndRemove(id).then(user => {
+    if (!user) {
+      response.status(404).send('No id found in database');
+    }
+    response.status(200).send({ user });
+  }).catch(error => {
+    response.status(400).send();
+  });
+});
+
 app.patch('/todos/:id', (request, response) => {
   const { id } = request.params;
   const { text, completed } = _.pick(request.body, ['text', 'completed']);
 
-  if (!ObjectID.isValid(id)) {
+  if (ObjectID.isValid(id) === false) {
     return response.status(404).send('Inexistent Object ID.');
   }
 
@@ -93,7 +109,7 @@ app.patch('/todos/:id', (request, response) => {
     if (!todo) {
       return response.status(404).send();
     }
-    response.status(200).send({ todo });
+    response.status(200).send(todo);
   }, (err) => {
     response.status(400).send();
   });
@@ -103,14 +119,14 @@ app.patch('/todos/:id', (request, response) => {
 
 app.get('/users', (request, response) => {
   User.find().then(users => {
-    response.send({ users });
+    response.send(users);
   });
 });
 
 app.get('/users/:id', (request, response) => {
   const { id } = request.params;
   if (ObjectID.isValid(id) === false) {
-    return response.status(404).send();
+    return response.status(404).send('Inexistent Object ID.');
   }
 
   User.findById(id).then(user => {
