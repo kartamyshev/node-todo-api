@@ -5,42 +5,56 @@ const { ObjectID } = require('mongodb');
 const { app } = require('./../server');
 const { Todo, User } = require('./../models');
 
-const todos = [
-  { _id: new ObjectID(), text: 'First test todo' },
-  { _id: new ObjectID(), text: 'Second test todo' }
-];
-
-
-describe('PATCH /todos/:id', () => {
-  it('should update the todo', done => {
-    const id = '5a44c141c817b2251259ed0a';
-    const text = 'Ololoev lambreken 2';
+describe('GET /todos', () => {
+  it('should retrieve all todos from test database', done => {
     supertest(app)
-      .patch(`/todos/${id}`)
-      .send({ text, completed: true })
+      .get('/todos')
       .expect(200)
       .expect(response => {
-        expect(response.body.text).toBe(text);
-        expect(response.body.completed).toBe(true);
-        // expect(response.body.completedAt).toBeA('number');
+        // expect(response.body).toBe([])
       })
-      .end(done)
+      .end(done);
   });
 
-  it('should clear completedAt when todo is not completed', done => {
-    const id = '5a44d8506c0e383469065127';
-    const text = 'Ololoev update from completed change';
+  it('should add todo to the test database', done => {
     supertest(app)
-      .patch(`/todos/${id}`)
-      .send({ completed: false, text })
-      .expect(response => {
-        expect(response.body.text).toBe(text);
-        expect(response.body.completed).toBe(false);
-        expect(response.body.completedAt).toBe(null);
-      })
-      .end(done)
+      .post('/todo/add')
+      .send({ text: 'first test todo' })
+      .expect(200)
+      .end(done);
   });
 });
+
+// describe('PATCH /todos/:id', () => {
+//   it('should update the todo', done => {
+//     const id = '5a44c141c817b2251259ed0a';
+//     const text = 'Ololoev lambreken 2';
+//     supertest(app)
+//       .patch(`/todos/${id}`)
+//       .send({ text, completed: true })
+//       .expect(200)
+//       .expect(response => {
+//         expect(response.body.text).toBe(text);
+//         expect(response.body.completed).toBe(true);
+//         // expect(response.body.completedAt).toBeA('number');
+//       })
+//       .end(done)
+//   });
+
+//   it('should clear completedAt when todo is not completed', done => {
+//     const id = '5a44d8506c0e383469065127';
+//     const text = 'Ololoev update from completed change';
+//     supertest(app)
+//       .patch(`/todos/${id}`)
+//       .send({ completed: false, text })
+//       .expect(response => {
+//         expect(response.body.text).toBe(text);
+//         expect(response.body.completed).toBe(false);
+//         expect(response.body.completedAt).toBe(null);
+//       })
+//       .end(done)
+//   });
+// });
 
 // beforeEach((done) => {
 //   Todo.remove({}).then(() => {

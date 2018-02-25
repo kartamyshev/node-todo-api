@@ -1,3 +1,5 @@
+require('./config/config');
+
 const _ = require('lodash');
 const express = require('express');
 const { ObjectID } = require('mongodb');
@@ -8,7 +10,7 @@ const { mongoose } = require('./db/mongoose');
 const { Todo, User } = require('./models');
 const initMiddleware = require('./initMiddleware');
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 const app = express();
 
 app.set("view engine", "pug");

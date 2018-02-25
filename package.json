@@ -6,8 +6,8 @@
   "scripts": {
     "debug": "nodemon server/server.js",
     "start": "node server/server.js",
-    "test": "mocha server/**/*.test.js",
-    "test-watch": "nodemon --exec 'yarn test'"
+    "test": "export NODE_ENV=test && mocha server/**/*.test.js",
+    "test-watch": "export NODE_ENV=test && nodemon --exec 'yarn test'"
   },
   "engines": {
     "node": "8.9.3"
