@@ -118,6 +118,28 @@ app.patch('/todos/:id', (request, response) => {
 
 });
 
+app.patch('/users/:id', (request, response, next) => {
+  const { id } = request.params;
+  if (ObjectID.isValid(id) === false) {
+    return response.status(404).send('Inexistent Object ID')
+  }
+
+  const updatedUser = {
+    email: request.body.email
+  }
+  User.findByIdAndUpdate(id,
+    { $set: updatedUser },
+    { new: true }
+  ).then(user => {
+    if (!user) {
+      return response.status(404).send('blah');
+    }
+    response.status(200).send(user);
+  }, (err) => {
+    response.status(400).send();
+  });
+});
+
 
 app.get('/users', (request, response) => {
   User.find().then(users => {
