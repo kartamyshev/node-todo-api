@@ -1,4 +1,5 @@
 require('./config/config');
+const { pick } = require('lodash');
 
 const _ = require('lodash');
 const express = require('express');
@@ -92,7 +93,7 @@ app.delete('/users/:id', (request, response) => {
 
 app.patch('/todos/:id', (request, response) => {
   const { id } = request.params;
-  const { text, completed } = _.pick(request.body, ['text', 'completed']);
+  const { text, completed } = pick(request.body, ['text', 'completed']);
 
   if (ObjectID.isValid(id) === false) {
     return response.status(404).send('Inexistent Object ID.');
@@ -162,13 +163,13 @@ app.get('/users/:id', (request, response) => {
 });
 
 app.post('/user/add', (request, response, next) => {
-  const { email } = request.body;
-  const user = new User({ email });
+  const { email, password } = pick(request.body, ['email', 'password']);
+  const user = new User({ email, password });
 
   user.save().then(doc => {
     response.send(doc);
-  }, err => {
-    response.send(err);
+  }).catch(err => {
+    response.status(400).send(err);
   });
 });
 
