@@ -1,11 +1,10 @@
 require('./config/config');
-const { pick } = require('lodash');
 
-const _ = require('lodash');
 const express = require('express');
 const { ObjectID } = require('mongodb');
 const path = require('path');
 const pug = require('pug');
+const { pick } = require('lodash');
 
 const { mongoose } = require('./db/mongoose');
 const { Todo, User } = require('./models');
@@ -166,11 +165,16 @@ app.post('/user/add', (request, response, next) => {
   const { email, password } = pick(request.body, ['email', 'password']);
   const user = new User({ email, password });
 
-  user.save().then(doc => {
-    response.send(doc);
-  }).catch(err => {
-    response.status(400).send(err);
-  });
+  user.save()
+    .then(() => {
+      return user.generateAuthToken();
+    })
+    .then((token) => {
+      response.header('x-auth', token).send(user);
+    })
+    .catch((err) => {
+      response.status(400).send(err);
+    });
 });
 
 app.listen(port, () => {
