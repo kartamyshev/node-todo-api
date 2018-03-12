@@ -8,7 +8,8 @@ const { pick } = require('lodash');
 
 const { mongoose } = require('./db/mongoose');
 const { Todo, User } = require('./models');
-const initMiddleware = require('./initMiddleware');
+const { initMiddleware } = require('./middleware/init');
+const { authenticate } = require('./middleware/authenticate');
 
 const port = process.env.PORT;
 const app = express();
@@ -26,7 +27,7 @@ app.get('/todos', (request, response) => {
   });
 });
 
-app.get('/todos/:id', (request, response) => {
+app.get('/todo/:id', (request, response) => {
   const { id } = request.params;
   if (ObjectID.isValid(id) === false) {
     response.status(404).send('Inexistent Object ID.');
@@ -54,7 +55,7 @@ app.post('/todo/add', (request, response, next) => {
   })
 });
 
-app.delete('/todos/:id', (request, response) => {
+app.delete('/todo/:id', (request, response) => {
   const { id } = request.params;
 
   if (ObjectID.isValid(id) === false) {
@@ -73,7 +74,7 @@ app.delete('/todos/:id', (request, response) => {
 
 });
 
-app.delete('/users/:id', (request, response) => {
+app.delete('/user/:id', (request, response) => {
   const { id } = request.params;
 
   if (ObjectID.isValid(id) === false) {
@@ -90,7 +91,7 @@ app.delete('/users/:id', (request, response) => {
   });
 });
 
-app.patch('/todos/:id', (request, response) => {
+app.patch('/todo/:id', (request, response) => {
   const { id } = request.params;
   const { text, completed } = pick(request.body, ['text', 'completed']);
 
@@ -109,7 +110,7 @@ app.patch('/todos/:id', (request, response) => {
     { new: true }
   ).then(todo => {
     if (!todo) {
-      return response.status(404).send();
+      return response.status(404).send('No id found in database');
     }
     response.status(200).send(todo);
   }, (err) => {
@@ -118,7 +119,7 @@ app.patch('/todos/:id', (request, response) => {
 
 });
 
-app.patch('/users/:id', (request, response, next) => {
+app.patch('/user/:id', (request, response, next) => {
   const { id } = request.params;
   if (ObjectID.isValid(id) === false) {
     return response.status(404).send('Inexistent Object ID')
@@ -132,7 +133,7 @@ app.patch('/users/:id', (request, response, next) => {
     { new: true }
   ).then(user => {
     if (!user) {
-      return response.status(404).send('blah');
+      return response.status(404).send('No id found in database');
     }
     response.status(200).send(user);
   }, (err) => {
@@ -147,7 +148,7 @@ app.get('/users', (request, response) => {
   });
 });
 
-app.get('/users/:id', (request, response) => {
+app.get('/user/:id', (request, response) => {
   const { id } = request.params;
   if (ObjectID.isValid(id) === false) {
     return response.status(404).send('Inexistent Object ID.');
@@ -175,6 +176,10 @@ app.post('/user/add', (request, response, next) => {
     .catch((err) => {
       response.status(400).send(err);
     });
+});
+
+app.get('/users/me', authenticate, (request, response, next) => {
+  response.status(200).send(request.user);
 });
 
 app.listen(port, () => {

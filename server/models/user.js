@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const { sign } = require('jsonwebtoken');
+const { sign, verify } = require('jsonwebtoken');
 const { pick } = require('lodash');
 
 const UserSchema = new mongoose.Schema({
@@ -54,6 +54,23 @@ UserSchema.methods.generateAuthToken = function() {
     return token;
   });
 };
+
+UserSchema.statics.findByToken = function(token) {
+  const User = this;
+  let decoded;
+
+  try {
+    decoded = verify(token, 'abc123');
+  } catch (error) {
+    return Promise.reject('Invalid x-auth token');
+  }
+
+  return User.findOne({
+    '_id': decoded._id,
+    'tokens.token': token,
+    'tokens.access': 'auth'
+  });
+}
 
 const User = mongoose.model('User', UserSchema);
 

@@ -12,4 +12,4 @@ const initMiddleware = (app) => {
   app.use(allowCORS);
 }
 
-module.exports = initMiddleware;
+module.exports = { initMiddleware };
