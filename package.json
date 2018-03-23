@@ -4,8 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "debug": "nodemon server/server.js",
-    "start": "node server/server.js",
+    "start": "nodemon server/server.js",
+    "mongo": "cd ~/mongo/bin && ./mongod --dbpath ~/mongo-data/",
     "test": "export NODE_ENV=test && mocha server/**/*.test.js",
     "test-watch": "export NODE_ENV=test && nodemon --exec 'yarn test'"
   },
@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "axios": "^0.17.1",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "jsonwebtoken": "^8.2.0",
