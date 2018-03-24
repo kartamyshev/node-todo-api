@@ -5,25 +5,29 @@ const { ObjectID } = require('mongodb');
 const { app } = require('./../server');
 const { Todo, User } = require('./../models');
 
-describe('GET /todos', () => {
-  it('should retrieve all todos from test database', done => {
-    supertest(app)
-      .get('/todos')
-      .expect(200)
-      .expect(response => {
-        // expect(response.body).toBe([])
-      })
-      .end(done);
-  });
+const { todos, populateTodos } = require('./seed/seed');
 
-  it('should add todo to the test database', done => {
-    supertest(app)
-      .post('/todo/add')
-      .send({ text: 'first test todo' })
-      .expect(200)
-      .end(done);
-  });
-});
+beforeEach(populateTodos);
+
+// describe('GET /todos', () => {
+//   it('should retrieve all todos from test database', done => {
+//     supertest(app)
+//       .get('/todos')
+//       .expect(200)
+//       .expect(response => {
+//         // expect(response.body).toBe([])
+//       })
+//       .end(done);
+//   });
+
+//   it('should add todo to the test database', done => {
+//     supertest(app)
+//       .post('/todo/add')
+//       .send({ text: 'first test todo' })
+//       .expect(200)
+//       .end(done);
+//   });
+// });
 
 // describe('PATCH /todos/:id', () => {
 //   it('should update the todo', done => {

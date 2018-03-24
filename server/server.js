@@ -178,6 +178,20 @@ app.post('/user/add', (request, response, next) => {
     });
 });
 
+app.post('/users/login', (request, response, next) => {
+  const body = pick(request.body, ['email', 'password']);
+
+  User.findByCredentials(body.email, body.password)
+    .then((user) => {
+      return user.generateAuthToken().then((token) => {
+        response.header('x-auth', token).send(user);
+      });
+    })
+    .catch((err) => {
+      response.status(400).send();
+    });
+});
+
 app.get('/users/me', authenticate, (request, response, next) => {
   response.status(200).send(request.user);
 });
