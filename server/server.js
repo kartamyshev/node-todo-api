@@ -192,6 +192,14 @@ app.post('/users/login', (request, response, next) => {
     });
 });
 
+app.delete('/users/me/token', authenticate, (request, response, next) => {
+  request.user.removeToken(request.token).then(() => {
+    response.status(200).send();
+  }, () => {
+    response.status(400).send();
+  });
+});
+
 app.get('/users/me', authenticate, (request, response, next) => {
   response.status(200).send(request.user);
 });
