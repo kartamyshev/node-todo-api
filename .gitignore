@@ -2,3 +2,4 @@ node_modules
 vocabulary
 yarn.lock
 playground
+server/config/config.json

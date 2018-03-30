@@ -47,7 +47,7 @@ UserSchema.methods.generateAuthToken = function() {
   const token = sign({
     _id: user._id.toHexString(),
     access: access
-  }, 'abc123').toString();
+  }, process.env.JWT_SECRET).toString();
 
   user.tokens = user.tokens.concat([{ access, token }])
 
@@ -72,7 +72,7 @@ UserSchema.statics.findByToken = function(token) {
   let decoded;
 
   try {
-    decoded = verify(token, 'abc123');
+    decoded = verify(token, process.env.JWT_SECRET);
   } catch (error) {
     return Promise.reject('Invalid x-auth token');
   }
