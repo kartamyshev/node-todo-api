@@ -21,20 +21,25 @@ app.get('/', (request, response) => {
   response.send(request.headers);
 });
 
-app.get('/todos', (request, response) => {
-  Todo.find().then(todos => {
-    response.send(todos);
-  });
+app.get('/todos', authenticate, (request, response) => {
+  Todo
+    .find({ _creator: request.user._id })
+    .then(todos => {
+      response.send(todos);
+    });
 });
 
-app.get('/todo/:id', (request, response) => {
+app.get('/todo/:id', authenticate, (request, response) => {
   const { id } = request.params;
   if (ObjectID.isValid(id) === false) {
     response.status(404).send('Inexistent Object ID.');
     return;
   }
 
-  Todo.findById(id).then(todo => {
+  Todo.findOne({
+    _id: id,
+    _creator: request.user._id
+  }).then(todo => {
     if (!todo) {
       response.status(404).send('No id found in database');
     }
@@ -44,9 +49,34 @@ app.get('/todo/:id', (request, response) => {
   });
 });
 
-app.post('/todo/add', (request, response, next) => {
+app.delete('/todo/:id', authenticate, (request, response, next) => {
+  const { id } = request.params;
+
+  if (ObjectID.isValid(id) === false) {
+    response.status(404).send('Inexistent Object ID.');
+    return;
+  }
+
+  Todo.findOneAndRemove({
+    _id: id,
+    _creator: request.user._id
+  }).then(todo => {
+    if (todo === null) {
+      response.status(404).send('No id found in database');
+    }
+    response.status(200).send({ todo });
+  }).catch(error => {
+    response.status(400).send();
+  });
+
+  next();
+
+});
+
+app.post('/todo/add', authenticate, (request, response, next) => {
   const { text, completed } = request.body;
-  const todo = new Todo({ text, completed });
+  const _creator = request.user._id;
+  const todo = new Todo({ text, completed, _creator });
 
   todo.save().then(doc => {
     response.send(doc);
@@ -55,20 +85,32 @@ app.post('/todo/add', (request, response, next) => {
   })
 });
 
-app.delete('/todo/:id', (request, response) => {
+app.patch('/todo/:id', authenticate, (request, response) => {
   const { id } = request.params;
+  const { text, completed } = pick(request.body, ['text', 'completed']);
 
   if (ObjectID.isValid(id) === false) {
-    response.status(404).send('Inexistent Object ID.');
-    return;
+    return response.status(404).send('Inexistent Object ID.');
   }
 
-  Todo.findByIdAndRemove(id).then(todo => {
+  const updatedDoc = {
+    text,
+    completed,
+    completedAt: completed ? Date.now() : null
+  };
+
+  Todo.findOneAndUpdate({
+    _id: id,
+    _creator: request.user._id
+  },
+    { $set: updatedDoc },
+    { new: true }
+  ).then(todo => {
     if (!todo) {
-      response.status(404).send('No id found in database');
+      return response.status(404).send('No id found in database');
     }
-    response.status(200).send({ todo });
-  }).catch(error => {
+    response.status(200).send(todo);
+  }, (err) => {
     response.status(400).send();
   });
 
@@ -89,34 +131,6 @@ app.delete('/user/:id', (request, response) => {
   }).catch(error => {
     response.status(400).send();
   });
-});
-
-app.patch('/todo/:id', (request, response) => {
-  const { id } = request.params;
-  const { text, completed } = pick(request.body, ['text', 'completed']);
-
-  if (ObjectID.isValid(id) === false) {
-    return response.status(404).send('Inexistent Object ID.');
-  }
-
-  const updatedDoc = {
-    text,
-    completed,
-    completedAt: completed ? Date.now() : null
-  };
-
-  Todo.findByIdAndUpdate(id,
-    { $set: updatedDoc },
-    { new: true }
-  ).then(todo => {
-    if (!todo) {
-      return response.status(404).send('No id found in database');
-    }
-    response.status(200).send(todo);
-  }, (err) => {
-    response.status(400).send();
-  });
-
 });
 
 app.patch('/user/:id', (request, response, next) => {
