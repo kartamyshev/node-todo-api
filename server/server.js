@@ -49,7 +49,7 @@ app.get('/todo/:id', authenticate, (request, response) => {
   });
 });
 
-app.delete('/todo/:id', authenticate, (request, response, next) => {
+app.delete('/todo/:id', authenticate, async (request, response, next) => {
   const { id } = request.params;
 
   if (ObjectID.isValid(id) === false) {
@@ -57,20 +57,18 @@ app.delete('/todo/:id', authenticate, (request, response, next) => {
     return;
   }
 
-  Todo.findOneAndRemove({
-    _id: id,
-    _creator: request.user._id
-  }).then(todo => {
+  try {
+    const todo = await Todo.findOneAndRemove({
+      _id: id,
+      _creator: request.user._id
+    });
     if (todo === null) {
       response.status(404).send('No id found in database');
     }
     response.status(200).send({ todo });
-  }).catch(error => {
+  } catch (error) {
     response.status(400).send();
-  });
-
-  next();
-
+  }
 });
 
 app.post('/todo/add', authenticate, (request, response, next) => {
@@ -176,42 +174,36 @@ app.get('/user/:id', (request, response) => {
   });
 });
 
-app.post('/user/add', (request, response, next) => {
-  const { email, password } = pick(request.body, ['email', 'password']);
-  const user = new User({ email, password });
-
-  user.save()
-    .then(() => {
-      return user.generateAuthToken();
-    })
-    .then((token) => {
-      response.header('x-auth', token).send(user);
-    })
-    .catch((err) => {
-      response.status(400).send(err);
-    });
+app.post('/user/add', async (request, response, next) => {
+  try {
+    const { email, password } = pick(request.body, ['email', 'password']);
+    const user = new User({ email, password });
+    await user.save();
+    const token = await user.generateAuthToken();
+    response.header('x-auth', token).send(user);
+  } catch (err) {
+    response.status(400).send(err);
+  }
 });
 
-app.post('/users/login', (request, response, next) => {
-  const body = pick(request.body, ['email', 'password']);
-
-  User.findByCredentials(body.email, body.password)
-    .then((user) => {
-      return user.generateAuthToken().then((token) => {
-        response.header('x-auth', token).send(user);
-      });
-    })
-    .catch((err) => {
-      response.status(400).send();
-    });
-});
-
-app.delete('/users/me/token', authenticate, (request, response, next) => {
-  request.user.removeToken(request.token).then(() => {
-    response.status(200).send();
-  }, () => {
+app.post('/users/login', async (request, response, next) => {
+  try {
+    const body = pick(request.body, ['email', 'password']);
+    const user = await User.findByCredentials(body.email, body.password);
+    const token = await user.generateAuthToken();
+    response.header('x-auth', token).send(user);
+  } catch (error) {
     response.status(400).send();
-  });
+  }
+});
+
+app.delete('/users/me/token', authenticate, async (request, response, next) => {
+  try {
+    await request.user.removeToken(request.token);
+    response.status(200).send();
+  } catch (error) {
+    response.status(400).send();
+  }
 });
 
 app.get('/users/me', authenticate, (request, response, next) => {
